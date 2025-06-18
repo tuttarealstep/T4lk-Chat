@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1750165231292,
+      "tag": "0000_hesitant_blue_marvel",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1750180672462,
+      "tag": "0001_grey_changeling",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1750182354774,
+      "tag": "0002_lush_trauma",
+      "breakpoints": true
+    }
+  ]
+}

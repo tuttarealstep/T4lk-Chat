@@ -23,10 +23,13 @@ jobs:
           node-version: 22
           cache: 'pnpm'
 
+      - name: Ensure NuxtHub module is installed
+        run: pnpx nuxthub@latest ensure
+
       - name: Install dependencies
         run: pnpm install
 
       - name: Build & Deploy to NuxtHub
         uses: nuxt-hub/action@v2
         with:
-          project-key: t4lk-chat-qoah
+          project-key: t4lk-chat-um2r

@@ -1,6 +1,6 @@
 import { auth } from "../lib/auth";
 import { defineEventHandler, readMultipartFormData, createError } from 'h3';
-import { db, schema } from '../database';
+import { useDrizzle, schema } from '../database';
 
 import { randomUUID } from 'node:crypto';
 import { extname } from 'node:path';
@@ -42,7 +42,7 @@ export default defineEventHandler(async (event) => {
   else if (file.type === 'application/pdf') attachmentType = 'pdf';
 
   // Inserisci nella tabella attachments
-  const [attachment] = await db.insert(schema.attachments)
+  const [attachment] = await useDrizzle().insert(schema.attachments)
     .values({
       id,
       userId: session.user.id,

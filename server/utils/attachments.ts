@@ -1,4 +1,4 @@
-import { db, schema } from '../database';
+import { useDrizzle, schema } from '../database';
 import { eq } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 
@@ -11,7 +11,7 @@ export async function linkAttachmentsToMessage(messageId: string, attachmentIds:
   if (!messageId || !attachmentIds?.length) return;
   await Promise.all(
     attachmentIds.map(attachmentId =>
-      db.insert(schema.messageAttachments).values({
+      useDrizzle().insert(schema.messageAttachments).values({
         id: randomUUID(),
         messageId,
         attachmentId,
@@ -29,7 +29,7 @@ export async function linkAttachmentsToMessage(messageId: string, attachmentIds:
 export async function getMessageAttachmentIds(messageId: string): Promise<string[]> {
   if (!messageId) return [];
   
-  const messageAttachments = await db.select({
+  const messageAttachments = await useDrizzle().select({
     attachmentId: schema.messageAttachments.attachmentId
   })
     .from(schema.messageAttachments)

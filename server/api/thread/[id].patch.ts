@@ -1,5 +1,5 @@
 import { auth } from "../../lib/auth";
-import { db, schema } from "../../database";
+import { useDrizzle, schema } from "../../database";
 import { eq, and } from 'drizzle-orm'
 import { z } from 'zod'
 
@@ -30,11 +30,9 @@ export default defineEventHandler(async (event) => {
         const validatedData = updateThreadSchema.parse(body)
 
         // Verifica che il thread appartenga all'utente
-        const existingThread = await db
-            .select()
-            .from(schema.threads)
-            .where(and(eq(schema.threads.id, threadId), eq(schema.threads.userId, session.user.id)))
-            .limit(1)
+        const existingThread = await useDrizzle().query.threads.findFirst({
+            where: and(eq(schema.threads.id, threadId), eq(schema.threads.userId, session.user.id))
+        });
 
         if (existingThread.length === 0) {
             setResponseStatus(event, 404);
@@ -53,7 +51,7 @@ export default defineEventHandler(async (event) => {
         if (validatedData.title !== undefined) {
             updateData.title = validatedData.title
             updateData.userSetTitle = true
-        }        if (validatedData.pinned !== undefined) {
+        } if (validatedData.pinned !== undefined) {
             updateData.pinned = validatedData.pinned
         }
 
@@ -61,7 +59,7 @@ export default defineEventHandler(async (event) => {
             updateData.branchedFromThreadId = validatedData.branchedFromThreadId
         }
 
-        const [updatedThread] = await db
+        const [updatedThread] = await useDrizzle()
             .update(schema.threads)
             .set(updateData)
             .where(and(eq(schema.threads.id, threadId), eq(schema.threads.userId, session.user.id)))

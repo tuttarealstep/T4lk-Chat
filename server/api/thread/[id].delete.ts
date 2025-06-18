@@ -1,5 +1,5 @@
 import { auth } from "../../lib/auth";
-import { db, schema } from "../../database";
+import { useDrizzle, schema } from "../../database";
 import { eq, and } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // Verifica che il thread appartenga all'utente
-    const existingThread = await db
+    const existingThread = await useDrizzle
       .select()
       .from(schema.threads)
       .where(and(eq(schema.threads.id, threadId), eq(schema.threads.userId, session.user.id)))
@@ -32,13 +32,13 @@ export default defineEventHandler(async (event) => {
     }
 
     // Prima di eliminare il thread, pulisci i riferimenti orfani nei thread che puntano a questo
-    await db
+    await useDrizzle
       .update(schema.threads)
       .set({ branchedFromThreadId: null })
       .where(eq(schema.threads.branchedFromThreadId, threadId))
 
     // Elimina il thread (i messaggi vengono eliminati automaticamente per cascade)
-    await db
+    await useDrizzle
       .delete(schema.threads)
       .where(and(eq(schema.threads.id, threadId), eq(schema.threads.userId, session.user.id)))
 

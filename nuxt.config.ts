@@ -12,27 +12,26 @@ export default defineNuxtConfig({
   future: {
     compatibilityVersion: 4,
   },
+  // Configurazione NuxtHub
+  hub: {
+    database: true,
+  },
   nitro: {
+    experimental: {
+      openAPI: true
+    },
     storage: {
       attachments: {
         driver: 'fs',
         base: './storage',
       }
     },
-    esbuild: {
-      options: {
-        target: 'esnext'
-      },
-    },
   },
   compatibilityDate: '2025-05-15',
   devtools: { enabled: false },
   modules: [
     '@nuxt/eslint',
-    '@nuxt/fonts',
     '@nuxt/icon',
-    '@nuxt/image',
-    '@nuxt/scripts',
     '@nuxt/test-utils',
     '@nuxtjs/i18n',
     '@nuxtjs/color-mode',

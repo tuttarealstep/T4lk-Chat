@@ -1,5 +1,5 @@
 import { auth } from "../../../lib/auth";
-import { db, schema } from "../../../database";
+import { useDrizzle, schema } from "../../../database";
 import { eq, and } from "drizzle-orm";
 
 export default defineEventHandler(async (event) => {
@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
         }
 
         // Verify thread ownership
-        const thread = await db.query.threads.findFirst({
+        const thread = await useDrizzle().query.threads.findFirst({
             where: and(
                 eq(schema.threads.id, threadId as string),
                 eq(schema.threads.userId, session.user.id)
@@ -34,7 +34,7 @@ export default defineEventHandler(async (event) => {
         }
 
         // Find and delete the share
-        const existingShare = await db.query.sharedChats.findFirst({
+        const existingShare = await useDrizzle().query.sharedChats.findFirst({
             where: eq(schema.sharedChats.threadId, threadId as string)
         });
 
@@ -44,7 +44,7 @@ export default defineEventHandler(async (event) => {
         }
 
         // Delete the share (cascade will handle shared messages and attachments)
-        await db.delete(schema.sharedChats)
+        await useDrizzle().delete(schema.sharedChats)
             .where(eq(schema.sharedChats.id, existingShare.id));
 
         return { success: true };

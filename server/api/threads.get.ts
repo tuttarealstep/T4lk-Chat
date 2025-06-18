@@ -1,5 +1,5 @@
 import { auth } from "../lib/auth";
-import { db, schema } from "../database";
+import { useDrizzle, schema } from "../database";
 import { eq } from "drizzle-orm";
 
 export default defineEventHandler(async (event) => {
@@ -12,7 +12,7 @@ export default defineEventHandler(async (event) => {
         return { error: "Unauthorized" };
     }
 
-    const threads = (await db.select()
+    const threads = (await useDrizzle().select()
         .from(schema.threads)
         .where(eq(schema.threads.userId, session.user?.id || session.user.id)))
         .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())

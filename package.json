@@ -12,6 +12,7 @@
     "postinstall": "nuxt prepare",
     "db:generate": "npx drizzle-kit generate",
     "db:migrate": "npx drizzle-kit migrate",
+    "db:migrate:remote": "npx wrangler d1 migrations apply --remote",
     "db:studio": "npx drizzle-kit studio",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
@@ -25,10 +26,7 @@
     "@ai-sdk/vue": "^1.2.12",
     "@ai-sdk/xai": "^1.2.16",
     "@nuxt/eslint": "1.4.1",
-    "@nuxt/fonts": "0.11.4",
     "@nuxt/icon": "1.13.0",
-    "@nuxt/image": "1.10.0",
-    "@nuxt/scripts": "0.11.8",
     "@nuxt/test-utils": "3.19.1",
     "@nuxthub/core": "^0.9.0",
     "@nuxtjs/i18n": "^9.5.5",
@@ -60,15 +58,20 @@
     "vue": "^3.5.16",
     "vue-router": "^4.5.1",
     "vue-sonner": "^2.0.0",
-    "zod": "^3.25.61"
+    "zod": "^3.25.61",
+    "@nuxtjs/color-mode": "^3.5.2"
   },
   "devDependencies": {
     "@iconify-json/lucide": "^1.2.48",
-    "@nuxtjs/color-mode": "^3.5.2",
     "@tailwindcss/typography": "^0.5.16",
     "@types/better-sqlite3": "^7.6.13",
     "drizzle-kit": "^0.31.1",
     "tsx": "^4.19.4",
-    "wrangler": "^4.20.2"
-  }
+    "wrangler": "^4.20.3"
+  },
+  "trustedDependencies": [
+    "@parcel/watcher",
+    "@tailwindcss/oxide",
+    "unrs-resolver"
+  ]
 }

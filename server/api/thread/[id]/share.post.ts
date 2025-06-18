@@ -1,5 +1,5 @@
 import { auth } from "../../../lib/auth";
-import { db, schema } from "../../../database";
+import { useDrizzle, schema } from "../../../database";
 import { eq, and } from "drizzle-orm";
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
@@ -29,7 +29,7 @@ export default defineEventHandler(async (event) => {
         }
 
         // Verify thread ownership
-        const thread = await db.query.threads.findFirst({
+        const thread = await useDrizzle().query.threads.findFirst({
             where: and(
                 eq(schema.threads.id, threadId as string),
                 eq(schema.threads.userId, session.user.id)
@@ -54,7 +54,7 @@ export default defineEventHandler(async (event) => {
         }
 
         // Check if there's already a share for this thread
-        const existingShare = await db.query.sharedChats.findFirst({
+        const existingShare = await useDrizzle().query.sharedChats.findFirst({
             where: eq(schema.sharedChats.threadId, threadId as string)
         });
 
@@ -73,12 +73,12 @@ export default defineEventHandler(async (event) => {
                 updateData.name = name;
             }
             
-            await db.update(schema.sharedChats)
+            await useDrizzle().update(schema.sharedChats)
                 .set(updateData)
                 .where(eq(schema.sharedChats.id, existingShare.id));
 
             // Delete existing shared messages to replace with current ones
-            await db.delete(schema.sharedMessages)
+            await useDrizzle().delete(schema.sharedMessages)
                 .where(eq(schema.sharedMessages.sharedChatId, existingShare.id));        } else {
             // Create new share
             shareId = randomUUID().replace(/-/g, '').substring(0, 12); // Shorter, URL-friendly ID
@@ -102,7 +102,7 @@ export default defineEventHandler(async (event) => {
                 insertData.name = name;
             }
             
-            const newShare = await db.insert(schema.sharedChats)
+            const newShare = await useDrizzle().insert(schema.sharedChats)
                 .values(insertData)
                 .returning()
                 .get();
@@ -124,7 +124,7 @@ export default defineEventHandler(async (event) => {
                 createdAt: new Date()
             }));
 
-            const insertedMessages = await db.insert(schema.sharedMessages)
+            const insertedMessages = await useDrizzle().insert(schema.sharedMessages)
                 .values(sharedMessagesData)
                 .returning();            // Clone message attachments
             for (let i = 0; i < thread.messages.length; i++) {
@@ -139,7 +139,7 @@ export default defineEventHandler(async (event) => {
                     }));
 
                     if (sharedMessage) {
-                        await db.insert(schema.sharedMessageAttachments)
+                        await useDrizzle().insert(schema.sharedMessageAttachments)
                             .values(sharedAttachmentsData);
                     }
                 }

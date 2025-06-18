@@ -1,5 +1,5 @@
 import { auth } from '../lib/auth'
-import { db } from '../database'
+import { useDrizzle } from '../database'
 import { favoriteModels } from '../database/schema'
 import { eq, and } from 'drizzle-orm'
 
@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
 
     if (method === 'GET') {
         // Get user's favorite models
-        const favorites = await db.select().from(favoriteModels).where(eq(favoriteModels.userId, user.id))
+        const favorites = await useDrizzle().select().from(favoriteModels).where(eq(favoriteModels.userId, user.id))
         return favorites.map(f => f.modelId)
     }
 
@@ -37,7 +37,7 @@ export default defineEventHandler(async (event) => {
         }
 
         // Check if already exists
-        const existing = await db.select().from(favoriteModels)
+        const existing = await useDrizzle().select().from(favoriteModels)
             .where(and(eq(favoriteModels.userId, user.id), eq(favoriteModels.modelId, modelId)))
 
         if (existing.length > 0) {
@@ -47,7 +47,7 @@ export default defineEventHandler(async (event) => {
             })
         }
 
-        await db.insert(favoriteModels).values({
+        await useDrizzle().insert(favoriteModels).values({
             userId: user.id,
             modelId
         })
@@ -67,7 +67,7 @@ export default defineEventHandler(async (event) => {
             })
         }
 
-        await db.delete(favoriteModels)
+        await useDrizzle().delete(favoriteModels)
             .where(and(eq(favoriteModels.userId, user.id), eq(favoriteModels.modelId, modelId)))
 
         return { success: true }

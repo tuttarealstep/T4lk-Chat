@@ -1,5 +1,5 @@
 import { auth } from "../../lib/auth";
-import { db, schema } from "../../database";
+import { useDrizzle, schema } from "../../database";
 import { eq, and } from "drizzle-orm";
 
 export default defineEventHandler(async (event) => {
@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
 
         const { id } = getRouterParams(event)
 
-        const thread = await db.query.threads.findFirst({
+        const thread = await useDrizzle().query.threads.findFirst({
             where: and(
                 eq(schema.threads.id, id as string),
                 eq(schema.threads.userId, session.user?.id || session.user.id)

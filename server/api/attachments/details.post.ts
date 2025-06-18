@@ -1,6 +1,6 @@
 import { auth } from "../../lib/auth";
 import { defineEventHandler, readBody } from 'h3';
-import { db, schema } from '../../database';
+import { useDrizzle, schema } from '../../database';
 import { inArray, eq, and } from 'drizzle-orm';
 
 export default defineEventHandler(async (event) => {
@@ -23,7 +23,7 @@ export default defineEventHandler(async (event) => {
 
   try {
     // Filter to only include attachments owned by the current user
-    const ownedAttachments = await db.select({
+    const ownedAttachments = await useDrizzle().select({
       id: schema.attachments.id,
       fileName: schema.attachments.fileName,
       fileSize: schema.attachments.fileSize,

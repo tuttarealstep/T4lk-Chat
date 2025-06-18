@@ -1,5 +1,5 @@
 import { auth } from '../lib/auth'
-import { db, schema } from '../database'
+import { useDrizzle, schema } from '../database'
 import { eq } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
@@ -12,7 +12,7 @@ export default defineEventHandler(async (event) => {
   const method = event.node.req.method
   if (method === 'GET') {
     // Recupera preferenze
-    const prefs = await db.select().from(schema.userPreferences).where(eq(schema.userPreferences.userId, userId)).get()
+    const prefs = await useDrizzle().select().from(schema.userPreferences).where(eq(schema.userPreferences.userId, userId)).get()
     if (!prefs) {
       return {
         name: '', occupation: '', selectedTraits: [], additionalInfo: '', lastSelectedModel: null, statsForNerds: false
@@ -30,11 +30,11 @@ export default defineEventHandler(async (event) => {
     const additionalInfo = (body.additionalInfo || '').slice(0, 3000)
     const lastSelectedModel = body.lastSelectedModel || null
     const statsForNerds = Boolean(body.statsForNerds)    // Upsert
-    const existing = await db.select().from(schema.userPreferences).where(eq(schema.userPreferences.userId, userId)).get()
+    const existing = await useDrizzle().select().from(schema.userPreferences).where(eq(schema.userPreferences.userId, userId)).get()
     if (existing) {
-      await db.update(schema.userPreferences).set({ name, occupation, selectedTraits, additionalInfo, lastSelectedModel, statsForNerds, updatedAt: new Date() }).where(eq(schema.userPreferences.userId, userId)).execute()
+      await useDrizzle().update(schema.userPreferences).set({ name, occupation, selectedTraits, additionalInfo, lastSelectedModel, statsForNerds, updatedAt: new Date() }).where(eq(schema.userPreferences.userId, userId)).execute()
     } else {
-      await db.insert(schema.userPreferences).values({ userId, name, occupation, selectedTraits, additionalInfo, lastSelectedModel, statsForNerds, createdAt: new Date(), updatedAt: new Date() }).execute()
+      await useDrizzle().insert(schema.userPreferences).values({ userId, name, occupation, selectedTraits, additionalInfo, lastSelectedModel, statsForNerds, createdAt: new Date(), updatedAt: new Date() }).execute()
     }
     return { success: true }
   }

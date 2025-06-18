@@ -93,13 +93,13 @@ T4lk Chat is an AI chat app built for the T3 Chat Cloneathon. The focus was on d
 4. **Start the development server:**
 
    ```bash
-   pnpm run dev
+   pnpm preview
    # or
    bun dev
    ```
 
 5. **Open in your browser:**
-   - Navigate to `http://localhost:3000`
+   - Navigate to `http://127.0.0.1:8787`
    - Enjoy chatting!
 
 ---

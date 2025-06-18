@@ -1,5 +1,5 @@
 import { auth } from "../lib/auth";
-import { db, schema } from "../database";
+import { useDrizzle, schema } from "../database";
 import { eq, and, inArray } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 import { ChatRequestSchema } from "../utils/schemas";
@@ -77,7 +77,7 @@ export default defineEventHandler(async (event) => {
 
         if (threadId) {
             // Check if thread exists and belongs to the user
-            const existingThread = await db.select()
+            const existingThread = await useDrizzle().select()
                 .from(schema.threads)
                 .where(and(
                     eq(schema.threads.id, threadId),
@@ -88,7 +88,7 @@ export default defineEventHandler(async (event) => {
             if (!existingThread) {
                 // Thread doesn't exist or doesn't belong to user, create new one
                 threadId = randomUUID();
-                thread = await db.insert(schema.threads)
+                thread = await useDrizzle().insert(schema.threads)
                     .values({
                         id: threadId,
                         userId: userId,
@@ -102,7 +102,7 @@ export default defineEventHandler(async (event) => {
         } else {
             // Create new thread
             threadId = randomUUID();
-            thread = await db.insert(schema.threads)
+            thread = await useDrizzle().insert(schema.threads)
                 .values({
                     id: threadId,
                     userId: userId,
@@ -122,7 +122,7 @@ export default defineEventHandler(async (event) => {
                 const title = await generateThreadTitle(firstTextMessage.parts.find(part => part.type === 'text')?.text || "", apiKeys);
 
                 // Update thread title
-                await db.update(schema.threads)
+                await useDrizzle().update(schema.threads)
                     .set({
                         title: title,
                         userSetTitle: false,
@@ -159,7 +159,7 @@ export default defineEventHandler(async (event) => {
 
         if (threadId) {
             // Get existing messages from database
-            const existingMessages = await db.select()
+            const existingMessages = await useDrizzle().select()
                 .from(schema.messages)
                 .where(eq(schema.messages.threadId, threadId))
                 .orderBy(schema.messages.createdAt)
@@ -230,7 +230,7 @@ export default defineEventHandler(async (event) => {
             if (editDetected && editStartIndex >= 0) {
                 const messagesToDelete = existingMessages.slice(editStartIndex);
                 for (const msgToDelete of messagesToDelete) {
-                    await db.delete(schema.messages)
+                    await useDrizzle().delete(schema.messages)
                         .where(eq(schema.messages.id, msgToDelete.id))
                         .execute();
                 }
@@ -262,7 +262,7 @@ export default defineEventHandler(async (event) => {
 
                 if (shouldSave) {
                     const messageId = message.id || randomUUID();
-                    await db.insert(schema.messages)
+                    await useDrizzle().insert(schema.messages)
                         .values({
                             id: messageId,
                             threadId: threadId,
@@ -292,7 +292,7 @@ export default defineEventHandler(async (event) => {
         }
 
         // Update thread with last message timestamp and status
-        await db.update(schema.threads)
+        await useDrizzle().update(schema.threads)
             .set({
                 lastMessageAt: new Date(),
                 updatedAt: new Date(),
@@ -302,9 +302,9 @@ export default defineEventHandler(async (event) => {
             .execute();
 
         // Update user's last selected model
-        const existingPrefs = await db.select().from(schema.userPreferences).where(eq(schema.userPreferences.userId, userId)).get()
+        const existingPrefs = await useDrizzle().select().from(schema.userPreferences).where(eq(schema.userPreferences.userId, userId)).get()
         if (existingPrefs) {
-            await db.update(schema.userPreferences)
+            await useDrizzle().update(schema.userPreferences)
                 .set({
                     lastSelectedModel: model,
                     updatedAt: new Date()
@@ -312,7 +312,7 @@ export default defineEventHandler(async (event) => {
                 .where(eq(schema.userPreferences.userId, userId))
                 .execute()
         } else {
-            await db.insert(schema.userPreferences)
+            await useDrizzle().insert(schema.userPreferences)
                 .values({
                     userId,
                     lastSelectedModel: model,
@@ -400,7 +400,7 @@ export default defineEventHandler(async (event) => {
                 // Handle attachments from request
                 let processed_attachments: { name: string; contentType: string; data: Buffer }[] | undefined = undefined; if (attachmentIds && attachmentIds.length > 0) {
                     try {
-                        const attachmentsData = await db.select()
+                        const attachmentsData = await useDrizzle().select()
                             .from(schema.attachments)
                             .where(inArray(schema.attachments.id, attachmentIds))
                             .all();
@@ -540,7 +540,7 @@ export default defineEventHandler(async (event) => {
                         const responseTime = (generationEndAt - generationStartAt) / 1000;
 
                         // Update message status
-                        await db.update(schema.messages)
+                        await useDrizzle().update(schema.messages)
                             .set({
                                 status: 'done',
                                 updatedAt: new Date()
@@ -569,7 +569,7 @@ export default defineEventHandler(async (event) => {
                             data: `data:image/${imageParams.openai?.output_format || 'png'};base64,${img.base64}`
                         }));
 
-                        await db.insert(schema.messages)
+                        await useDrizzle().insert(schema.messages)
                             .values({
                                 id: assistantMessageId,
                                 threadId: threadId,
@@ -584,7 +584,7 @@ export default defineEventHandler(async (event) => {
                             }).execute();
 
                         // Update thread status
-                        await db.update(schema.threads)
+                        await useDrizzle().update(schema.threads)
                             .set({
                                 generationStatus: 'completed',
                                 updatedAt: new Date(),
@@ -617,7 +617,7 @@ export default defineEventHandler(async (event) => {
                         });
 
                         // Update message status to waiting
-                        await db.update(schema.messages)
+                        await useDrizzle().update(schema.messages)
                             .set({
                                 status: 'waiting',
                                 updatedAt: new Date()
@@ -666,7 +666,7 @@ export default defineEventHandler(async (event) => {
                             const tokensPerSecond = totalTokens / responseTime
 
                             // Update message status
-                            await db.update(schema.messages)
+                            await useDrizzle().update(schema.messages)
                                 .set({
                                     status: 'done',
                                     updatedAt: new Date()
@@ -695,7 +695,7 @@ export default defineEventHandler(async (event) => {
                                 text: streamResponse.text
                             });
 
-                            await db.insert(schema.messages)
+                            await useDrizzle().insert(schema.messages)
                                 .values({
                                     id: assistantMessageId,
                                     threadId: threadId,
@@ -712,7 +712,7 @@ export default defineEventHandler(async (event) => {
                                 .execute();
 
                             // Update thread status
-                            await db.update(schema.threads)
+                            await useDrizzle().update(schema.threads)
                                 .set({
                                     generationStatus: 'completed',
                                     updatedAt: new Date(),
@@ -744,7 +744,7 @@ export default defineEventHandler(async (event) => {
                             });
 
                             // Update message status to waiting
-                            db.update(schema.messages)
+                            useDrizzle().update(schema.messages)
                                 .set({
                                     status: 'waiting',
                                     updatedAt: new Date()

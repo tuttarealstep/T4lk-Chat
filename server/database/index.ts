@@ -1,13 +1,22 @@
 import 'dotenv/config';
-import { drizzle } from 'drizzle-orm/better-sqlite3';
+import { drizzle as drizzleD1 } from 'drizzle-orm/d1';
 import * as schema from './schema';
-import Database from 'better-sqlite3';
+//import Database from 'better-sqlite3';
 
-const sqlite = new Database(process.env.DB_FILE_NAME!);
-export const db = drizzle(sqlite, {
-    schema
-});
 
-export {
-    schema
+export function useDrizzle() {
+  /*if (process.env.NODE_ENV === 'production' || process.env.NUXT_HUB_PROJECT_KEY) {
+    // Usa NuxtHub D1 in produzione o con NuxtHub
+    db = drizzleD1(hubDatabase(), { schema });
+  } else {
+    // Usa SQLite locale in sviluppo
+    const sqlite = new Database(process.env.DB_FILE_NAME || './server/database/db.sqlite');
+    db = drizzle(sqlite, { schema });
+  }
+*/
+
+  
+  return drizzleD1(hubDatabase(), { schema });;
 }
+
+export { schema };

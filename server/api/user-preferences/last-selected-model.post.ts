@@ -1,5 +1,5 @@
 import { auth } from '../../lib/auth'
-import { db, schema } from '../../database'
+import { useDrizzle, schema } from '../../database'
 import { eq } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
@@ -18,10 +18,10 @@ export default defineEventHandler(async (event) => {
   }
   
   // Upsert delle preferenze utente con l'ultimo modello selezionato
-  const existing = await db.select().from(schema.userPreferences).where(eq(schema.userPreferences.userId, userId)).get()
+  const existing = await useDrizzle().select().from(schema.userPreferences).where(eq(schema.userPreferences.userId, userId)).get()
   
   if (existing) {
-    await db.update(schema.userPreferences)
+    await useDrizzle().update(schema.userPreferences)
       .set({ 
         lastSelectedModel: body.modelId,
         updatedAt: new Date() 
@@ -29,7 +29,7 @@ export default defineEventHandler(async (event) => {
       .where(eq(schema.userPreferences.userId, userId))
       .execute()
   } else {
-    await db.insert(schema.userPreferences)
+    await useDrizzle().insert(schema.userPreferences)
       .values({ 
         userId, 
         lastSelectedModel: body.modelId,

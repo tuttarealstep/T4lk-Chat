@@ -1,5 +1,5 @@
 import { auth } from "../../../lib/auth";
-import { db, schema } from "../../../database";
+import { useDrizzle, schema } from "../../../database";
 import { eq } from "drizzle-orm";
 import { randomUUID } from 'node:crypto';
 
@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
         }
 
         // Find the shared chat
-        const sharedChat = await db.query.sharedChats.findFirst({
+        const sharedChat = await useDrizzle().query.sharedChats.findFirst({
             where: eq(schema.sharedChats.shareId, shareId as string),
             with: {
                 thread: {
@@ -50,7 +50,7 @@ export default defineEventHandler(async (event) => {
 
         // Create new thread for the user
         const newThreadId = randomUUID();
-        const newThread = await db.insert(schema.threads)
+        const newThread = await useDrizzle().insert(schema.threads)
             .values({
                 id: newThreadId,
                 title: `${sharedChat.thread.title}`,
@@ -80,7 +80,7 @@ export default defineEventHandler(async (event) => {
                 updatedAt: new Date()
             }));
 
-            const insertedMessages = await db.insert(schema.messages).values(newMessages).returning();            // Clone shared message attachments to the new messages
+            const insertedMessages = await useDrizzle().insert(schema.messages).values(newMessages).returning();            // Clone shared message attachments to the new messages
             for (let i = 0; i < sharedChat.sharedMessages.length; i++) {
                 const sharedMessage = sharedChat.sharedMessages[i];
                 const newMessage = insertedMessages[i];
@@ -94,7 +94,7 @@ export default defineEventHandler(async (event) => {
                     }));
 
                     if (newMessage) {
-                        await db.insert(schema.messageAttachments).values(newAttachments);
+                        await useDrizzle().insert(schema.messageAttachments).values(newAttachments);
                     }
                 }
             }

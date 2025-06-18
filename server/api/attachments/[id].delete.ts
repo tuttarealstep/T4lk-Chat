@@ -1,6 +1,6 @@
 import { auth } from "../../lib/auth";
 import { defineEventHandler, createError } from 'h3';
-import { db, schema } from '../../database';
+import { useDrizzle, schema } from '../../database';
 import { eq, and } from 'drizzle-orm';
 
 export default defineEventHandler(async (event) => {
@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
 
   try {
     // Find the attachment to delete
-    const attachment = await db.select()
+    const attachment = await useDrizzle().select()
       .from(schema.attachments)
       .where(and(
         eq(schema.attachments.id, attachmentId),
@@ -44,7 +44,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // Delete from database
-    await db.delete(schema.attachments)
+    await useDrizzle().delete(schema.attachments)
       .where(and(
         eq(schema.attachments.id, attachmentId),
         eq(schema.attachments.userId, session.user.id)

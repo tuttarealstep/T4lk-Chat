@@ -1,5 +1,5 @@
 import { auth } from "../../../lib/auth";
-import { db, schema } from "../../../database";
+import { useDrizzle, schema } from "../../../database";
 import { eq, and, lte } from "drizzle-orm";
 import { randomUUID } from 'node:crypto';
 
@@ -23,7 +23,7 @@ export default defineEventHandler(async (event) => {
         }
 
         // Get the original thread to verify ownership
-        const originalThread = await db.query.threads.findFirst({
+        const originalThread = await useDrizzle().query.threads.findFirst({
             where: and(
                 eq(schema.threads.id, threadId as string),
                 eq(schema.threads.userId, session.user?.id || session.user.id)
@@ -36,7 +36,7 @@ export default defineEventHandler(async (event) => {
         }
 
         // Get the target message to verify it exists and get its timestamp
-        const targetMessage = await db.query.messages.findFirst({
+        const targetMessage = await useDrizzle().query.messages.findFirst({
             where: and(
                 eq(schema.messages.id, messageId as string),
                 eq(schema.messages.threadId, threadId as string)
@@ -49,7 +49,7 @@ export default defineEventHandler(async (event) => {
         }
 
         // Get all messages up to and including the target message (by creation time)
-        const messagesToCopy = await db.query.messages.findMany({
+        const messagesToCopy = await useDrizzle().query.messages.findMany({
             where: and(
                 eq(schema.messages.threadId, threadId as string),
                 lte(schema.messages.createdAt, targetMessage.createdAt)
@@ -59,7 +59,7 @@ export default defineEventHandler(async (event) => {
 
         // Create new thread
         const newThreadId = randomUUID();
-        const newThread = await db.insert(schema.threads)
+        const newThread = await useDrizzle().insert(schema.threads)
             .values({
                 id: newThreadId,
                 title: `${originalThread.title}`,
@@ -89,7 +89,7 @@ export default defineEventHandler(async (event) => {
                 updatedAt: new Date()
             }));
 
-            await db.insert(schema.messages).values(newMessages);
+            await useDrizzle().insert(schema.messages).values(newMessages);
         }
 
         // Return the new thread

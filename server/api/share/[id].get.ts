@@ -1,4 +1,4 @@
-import { db, schema } from "../../database";
+import { useDrizzle, schema } from "../../database";
 import { eq } from "drizzle-orm";
 
 export default defineEventHandler(async (event) => {
@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
         }
 
         // Find the shared chat
-        const sharedChat = await db.query.sharedChats.findFirst({
+        const sharedChat = await useDrizzle().query.sharedChats.findFirst({
             where: eq(schema.sharedChats.shareId, shareId as string),
             with: {
                 thread: {

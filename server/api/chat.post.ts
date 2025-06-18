@@ -9,7 +9,6 @@ import { createDataStreamResponse, type Message, smoothStream, streamText, type 
 import { chatSystemPrompt } from "../utils/ai/prompts";
 import { LLM_FEATURES, LLM_PROVIDERS, type LLMInfo } from "#shared/ai/LLM";
 import { openai } from "@ai-sdk/openai";
-import type { TextUIPart } from '@ai-sdk/ui-utils';
 
 // Helper function to safely extract text from message parts
 function getTextFromParts(parts: Array<any> | null | undefined): string {
@@ -17,7 +16,7 @@ function getTextFromParts(parts: Array<any> | null | undefined): string {
         return '';
     }
 
-    const textPart = parts.find((part): part is TextUIPart => part?.type === 'text' && typeof part.text === 'string');
+    const textPart = parts.find((part) => part?.type === 'text' && typeof part.text === 'string');
     return textPart?.text || '';
 }
 
@@ -133,7 +132,7 @@ export default defineEventHandler(async (event) => {
 
                 thread.title = title;
             }
-        }        const lastMessage: Message | undefined = messages[messages.length - 1]
+        } const lastMessage: Message | undefined = messages[messages.length - 1]
         if (!lastMessage) {
             setResponseStatus(event, 400);
             return { error: "No messages provided" };
@@ -148,14 +147,13 @@ export default defineEventHandler(async (event) => {
         // Check if message has text content or attachments are provided
         const hasTextContent = lastMessage.parts.some(part => part.type === 'text' && part.text?.trim());
         const hasAttachments = attachmentIds && attachmentIds.length > 0;
-        
+
         if (!hasTextContent && !hasAttachments) {
             setResponseStatus(event, 400);
             return { error: "Message must contain either text content or attachments" };
-        }
-
-        // Salva attachmentIds su message_attachments dopo aver creato il messaggio utente
+        }        // Salva attachmentIds su message_attachments dopo aver creato il messaggio utente
         let lastUserMessageId: string | undefined;
+        let messageIdForGeneration: string | undefined;
 
         if (threadId) {
             // Get existing messages from database
@@ -258,9 +256,7 @@ export default defineEventHandler(async (event) => {
                 } else {
                     // For normal conversation: save only truly new messages
                     shouldSave = index >= existingMessages.length;
-                }
-
-                if (shouldSave) {
+                }                if (shouldSave) {
                     const messageId = message.id || randomUUID();
                     await useDrizzle().insert(schema.messages)
                         .values({
@@ -281,6 +277,7 @@ export default defineEventHandler(async (event) => {
                     // Se è l'ultimo messaggio utente, salva l'id
                     if (index === messages.length - 1 && message.role === 'user') {
                         lastUserMessageId = messageId;
+                        messageIdForGeneration = messageId; // Salva l'ID per la generazione
                     }
                 }
             }
@@ -323,10 +320,13 @@ export default defineEventHandler(async (event) => {
                     createdAt: new Date(),
                     updatedAt: new Date()
                 }).execute()
-        }
+        }        // Get the ID of the last user message that will need generation
+        const messageId = messageIdForGeneration || lastMessage.id;
 
-        // Get the ID of the last user message that will need generation
-        const messageId = lastMessage.id;
+        if (!messageId) {
+            setResponseStatus(event, 500);
+            return { error: "Failed to get message ID for generation" };
+        }
 
         let aiProvider;
         try {
@@ -440,12 +440,12 @@ export default defineEventHandler(async (event) => {
                     } catch (error) {
                         console.error("Failed to retrieve attachments:", error);
                     }
-                }                const parsedMessages = messages.map((msg) => {
+                } const parsedMessages = messages.map((msg) => {
                     // Check if this message has only whitespace text and attachments
                     const textParts = msg.parts?.filter(part => part.type === 'text' && typeof part.text === 'string') || []
                     const hasOnlyWhitespace = textParts.length > 0 && textParts.every(part => !part.text.trim())
                     const hasAttachments = processed_attachments && processed_attachments.length > 0
-                    
+
                     return {
                         role: msg.role,
                         content: [
@@ -738,10 +738,11 @@ export default defineEventHandler(async (event) => {
                         },
                         onError(error: any) {
                             console.error("AI generation error:", error);
-                            dataStream.writeData({
+
+                            /*dataStream.writeData({
                                 type: 'error',
                                 error: error instanceof Error ? error.message : 'Unknown error'
-                            });
+                            });*/
 
                             // Update message status to waiting
                             useDrizzle().update(schema.messages)
@@ -759,6 +760,23 @@ export default defineEventHandler(async (event) => {
                         sendUsage: true,
                     });
                 }
+            },
+            onError: (error: unknown) => {
+                //TODO - THIS IS NOT GOOD FOR PRODUCTION
+                //https://ai-sdk.dev/docs/troubleshooting/use-chat-an-error-occurred
+                if (error == null) {
+                    return 'unknown error';
+                }
+
+                if (typeof error === 'string') {
+                    return error;
+                }
+
+                if (error instanceof Error) {
+                    return error.message;
+                }
+
+                return JSON.stringify(error);
             },
         })
 

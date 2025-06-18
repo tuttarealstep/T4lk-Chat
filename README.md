@@ -1,4 +1,4 @@
-# T4lk Chat – T3 Chat Cloneathon Submission
+# T4lk Chat
 
 Welcome to **T4lk Chat**, my entry for the [T3 Chat Cloneathon](https://cloneathon.t3.chat/)!
 

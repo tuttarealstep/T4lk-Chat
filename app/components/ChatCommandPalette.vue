@@ -18,9 +18,6 @@ const {
     handleSelect
 } = useCommandPalette()
 
-// Debug log
-console.log('CommandPalette component loaded, isOpen:', isOpen.value)
-
 const inputRef = ref<HTMLInputElement | null>(null)
 
 // Focus input when dialog opens
@@ -160,8 +157,8 @@ const displayItems = computed(() => {    const items: Array<{
 
                             <!-- Content -->
                             <div class="flex-1 min-w-0">
-                                <div class="font-medium truncate">{{ item.title }}</div>
-                                <div class="text-xs text-muted-foreground truncate">{{ item.subtitle }}</div>
+                                <div class="font-medium whitespace-normal">{{ item.title }}</div>
+                                <div class="text-xs text-muted-foreground whitespace-normal">{{ item.subtitle }}</div>
                             </div>
 
                             <!-- Badge for pinned threads -->

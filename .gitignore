@@ -31,3 +31,4 @@ inutils
 
 storage
 .wrangler
+.claude/*.local.json

@@ -13,7 +13,6 @@ const props = withDefaults(defineProps<ChatSidebarProps>(), {
 })
 
 const { state } = useSidebar()
-
 </script>
 
 <template>
@@ -25,8 +24,10 @@ const { state } = useSidebar()
         <ChatSidebarContent />
         <ChatSidebarFooter />
         <div
-class="absolute right-0 top-0 h-full w-2 cursor-col-resize" @mousedown="props.startResize"
-            @touchstart="props.startResize"/>
+            class="absolute right-0 top-0 h-full w-2 cursor-col-resize" 
+            @mousedown="props.startResize"
+            @touchstart="props.startResize"
+        />
     </Sidebar>
 </template>
 

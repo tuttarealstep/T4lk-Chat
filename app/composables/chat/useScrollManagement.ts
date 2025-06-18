@@ -2,13 +2,15 @@ export interface ScrollManagementOptions {
   threshold?: number
   autoScrollDelay?: number
   smoothScrollDuration?: number
+  streamingScrollThrottle?: number
 }
 
 export function useScrollManagement(options: ScrollManagementOptions = {}) {
   const {
     threshold = 50,
     autoScrollDelay = 200,
-    smoothScrollDuration = 100
+    smoothScrollDuration = 100,
+    streamingScrollThrottle = 16
   } = options
 
   const scrollContainer = ref<HTMLElement>()
@@ -17,6 +19,7 @@ export function useScrollManagement(options: ScrollManagementOptions = {}) {
   const autoScrollPaused = ref(false)
   const scrollDimensionsKey = ref(0)
   const scrollTimeout = ref<NodeJS.Timeout | null>(null)
+  const streamingScrollTimeout = ref<NodeJS.Timeout | null>(null)
 
   // Check if user is at the bottom of scroll container
   const checkIfAtBottom = (): boolean => {
@@ -46,20 +49,42 @@ export function useScrollManagement(options: ScrollManagementOptions = {}) {
     scrollDimensionsKey.value++
   }
 
-  // Scroll to bottom function
-  const scrollToBottom = (smooth = true): void => {
+  // Scroll to bottom function with streaming optimization
+  const scrollToBottom = (smooth = true, isStreamingContent = false): void => {
     if (!scrollContainer.value) return
 
     isAutoScrolling.value = true
     
-    scrollContainer.value.scrollTo({
-      top: scrollContainer.value.scrollHeight,
-      behavior: smooth ? 'smooth' : 'instant'
-    })
+    if (isStreamingContent) {
+      // For streaming content, use direct scrollTop for immediate response
+      scrollContainer.value.scrollTop = scrollContainer.value.scrollHeight
+      requestAnimationFrame(() => {
+        isAutoScrolling.value = false
+      })
+    } else {
+      // For non-streaming content, use smooth behavior
+      scrollContainer.value.scrollTo({
+        top: scrollContainer.value.scrollHeight,
+        behavior: smooth ? 'smooth' : 'instant'
+      })
+      
+      setTimeout(() => {
+        isAutoScrolling.value = false
+      }, smoothScrollDuration)
+    }
+  }
 
-    setTimeout(() => {
-      isAutoScrolling.value = false
-    }, smoothScrollDuration)
+  // Throttled scroll for streaming content using requestAnimationFrame
+  let animationFrameId: number | null = null
+  const scrollToBottomThrottled = (): void => {
+    if (animationFrameId !== null) return
+
+    animationFrameId = requestAnimationFrame(() => {
+      if (isUserAtBottom.value && !autoScrollPaused.value && scrollContainer.value) {
+        scrollContainer.value.scrollTop = scrollContainer.value.scrollHeight
+      }
+      animationFrameId = null
+    })
   }
 
   // Handle scroll events
@@ -117,13 +142,13 @@ export function useScrollManagement(options: ScrollManagementOptions = {}) {
       // Auto-scroll conditions
       if (hasNewMessages) {
         autoScrollPaused.value = false
-        scrollToBottom(true)
+        scrollToBottom(true, false) // Smooth scroll for new messages
         return
       }
 
-      // During streaming, only scroll if user is at bottom and not paused
+      // During streaming, use throttled instant scroll
       if (isStreaming && isUserAtBottom.value && !autoScrollPaused.value) {
-        scrollToBottom(true)
+        scrollToBottomThrottled()
       }
     })
   }
@@ -155,6 +180,16 @@ export function useScrollManagement(options: ScrollManagementOptions = {}) {
         clearTimeout(scrollTimeout.value)
         scrollTimeout.value = null
       }
+      
+      if (streamingScrollTimeout.value) {
+        clearTimeout(streamingScrollTimeout.value)  
+        streamingScrollTimeout.value = null
+      }
+      
+      if (animationFrameId !== null) {
+        cancelAnimationFrame(animationFrameId)
+        animationFrameId = null
+      }
     }
   }
 
@@ -185,7 +220,7 @@ export function useScrollManagement(options: ScrollManagementOptions = {}) {
       } else if (isStreamingOrSubmitted) {
         handleScrollDuringStreaming(true)
         if (isUserAtBottom.value && !autoScrollPaused.value) {
-          scrollToBottom(true)
+          scrollToBottomThrottled() // Use throttled scroll during streaming
         }
       } else if (streamingJustEnded) {
         autoScrollPaused.value = false
@@ -225,6 +260,7 @@ export function useScrollManagement(options: ScrollManagementOptions = {}) {
     
     // Methods
     scrollToBottom,
+    scrollToBottomThrottled,
     handleScroll,
     updateScrollDimensions,
     setupScrollListeners,

@@ -73,7 +73,10 @@ defineExpose({
   <div
     ref="scrollContainer"
     class="absolute inset-0 overflow-y-scroll sm:pt-3.5"
-    style="scrollbar-gutter: stable both-edges;"
+    :class="{
+      'scroll-smooth': status !== 'streaming'
+    }"
+    style="scrollbar-gutter: stable both-edges; will-change: scroll-position; scroll-behavior: auto;"
   >
     <div
       class="mx-auto flex w-full max-w-3xl flex-col space-y-12 px-4 pb-10 pt-safe-offset-10"

@@ -151,8 +151,8 @@ useHead({
     <!-- Chat content using existing components -->
     <div v-else-if="shareData" class="relative flex flex-col h-full">
 
-        <!-- Chat content with top padding for header -->
-        <div class="pt-16 flex-1">
+        <!-- Chat content with padding for header and footer -->
+        <div class="pt-16 pb-20 flex-1">
             <ChatReadOnly :share-data="shareData" />
         </div>
 

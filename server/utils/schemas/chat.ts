@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { Message } from "ai";
+import { ApiKeys } from "~~/shared/types/api-keys";
 
 // Thread metadata schemas
 export const ThreadMetadataSchema = z.object({
@@ -57,23 +58,6 @@ export const UserInfoSchema = z.object({
     timezone: z.string()
 });
 
-// API Keys schemas
-export const ApiKeysSchema = z.object({
-    openai: z.string().optional(),
-    azure: z.object({
-        apiKey: z.string(),
-        deployments: z.record(z.string(), z.object({
-            resourceName: z.string(),
-            deploymentName: z.string().optional()
-        })).optional()
-    }).optional(),
-    anthropic: z.string().optional(),
-    openrouter: z.string().optional(),
-    google: z.string().optional(),
-    deepseek: z.string().optional(),
-    xai: z.string().optional()
-}).optional();
-
 // Main chat request schema
 export const ChatRequestSchema = z.object({
     messages: z.array(z.custom<Message>()),
@@ -82,6 +66,6 @@ export const ChatRequestSchema = z.object({
     modelParams: ModelParamsSchema.optional(),
     preferences: PreferencesSchema,
     userInfo: UserInfoSchema,
-    apiKeys: ApiKeysSchema,
+    apiKeys: z.custom<ApiKeys>(),
     attachmentIds: z.array(z.string()).optional(),
 });

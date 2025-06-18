@@ -116,7 +116,7 @@ const handleModelSelected = () => {
 const selectedModelInfo = computed(() => {
     // Force re-evaluation when model availability changes
     void aiStore.modelAvailabilityTrigger
-    
+
     if (!selectedModel?.value) return null
     return aiStore.getModelsWithCredentials.find(model => model.modelKey === selectedModel.value)
 })
@@ -191,11 +191,17 @@ const handleFormSubmit = async () => {
         toast.error(t('chat.model_required'))
         return
     }
+
     if (!selectedModelInfo.value?.hasCredentials) {
         toast.error(t('chat.model_requires_api_key', {
             model: selectedModelInfo.value?.name || 'Unknown',
             provider: selectedModelInfo.value?.provider || 'Unknown'
         }))
+        return
+    }
+
+    if (chatState.status.value === 'streaming') {
+        toast.error(t('chat.cancel_streaming_first'))
         return
     }
 
@@ -218,7 +224,9 @@ const handleFormSubmit = async () => {
     }
 
     // Clear draft before submitting
-    clearDraft()    // Get attachment IDs from already uploaded attachments
+    clearDraft()
+
+    // Get attachment IDs from already uploaded attachments
     const attachmentIds = uploadedAttachments.value.map(att => att.id)
 
     // Keep a copy of attachment data before clearing
@@ -420,7 +428,6 @@ function formatFileSize(bytes: number) {
             <div id="chat-input-container" class="pointer-events-none">
                 <div class="pointer-events-auto">
                     <div class="rounded-t-[20px] bg-[var(--chat-input-background)] p-2 pb-0 backdrop-blur-lg">
-
                         <form ref="chatInputForm"
                             class="relative flex w-full flex-col items-stretch gap-2 rounded-t-xl border border-b-0 border-white/70 bg-[var(--chat-input-background)] px-3 pt-3 text-secondary-foreground outline outline-[var(--chat-input-gradient)] pb-safe-offset-3 max-sm:pb-6 sm:max-w-3xl dark:border-[hsl(0,0%,83%)]/[0.04] dark:bg-secondary/[0.045] dark:outline-chat-background/40"
                             @submit.prevent="handleFormSubmit()" @drop="handleDrop" @dragover="handleDragOver">
@@ -548,12 +555,12 @@ function formatFileSize(bytes: number) {
                                                 </TooltipTrigger>
                                                 <TooltipContent side="top">
                                                     <span v-if="isUploading">{{ $t('chat.uploading_attachments')
-                                                    }}</span>
+                                                        }}</span>
                                                     <span v-else-if="!isModelSelected">{{ $t('chat.model_required')
-                                                    }}</span>
+                                                        }}</span>
                                                     <span v-else-if="!input && uploadedAttachments.length === 0">{{
                                                         $t('chat.message_requires_content')
-                                                        }}</span>
+                                                    }}</span>
                                                     <span v-else>{{ $t('chat.send_message') }}</span>
                                                 </TooltipContent>
                                             </Tooltip>

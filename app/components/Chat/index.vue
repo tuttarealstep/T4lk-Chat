@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useChat, type Message, type UseChatHelpers } from '@ai-sdk/vue'
+import { useChat, type UseChatHelpers } from '@ai-sdk/vue'
 import { useChatNavigation } from '~/composables/useChatNavigation'
 import { useRouter } from 'vue-router'
 import { defaultLLM, LLM_FEATURES } from '#shared/ai/LLM'
@@ -8,7 +8,7 @@ import { useUserStore } from '~/stores/user'
 import { useChatStore } from '~/stores/chat'
 import { toast } from 'vue-sonner'
 import { useI18n } from 'vue-i18n'
-import type { UIMessage } from '~/types/chat'
+import type { Message } from '~/types/chat'
 
 const aiStore = useAiStore()
 const userStore = useUserStore()
@@ -28,7 +28,7 @@ const chatInputForm = useTemplateRef('chatInputForm')
 const chatMessages = useTemplateRef('chatMessages')
 
 // Helper functions moved from useStoreHelpers
-const findMessageIndex = (messages: UIMessage[], messageId: string): number => {
+const findMessageIndex = (messages: Message[], messageId: string): number => {
     return messages.findIndex(msg => msg.id === messageId)
 }
 
@@ -169,34 +169,12 @@ watch(() => props.threadId, async (newThreadId) => {
 
 // Load existing messages if threadId is provided
 const initialMessages: Message[] = []
-if (props.threadId) {
-    const { data: threadData } = await useFetch(`/api/thread/${props.threadId}`)
-    if (threadData.value && 'messages' in threadData.value) {
-        const mappedMessages = threadData.value.messages.map((msg) => ({
-            id: msg.id,
-            role: msg.role,
-            content: (msg.parts ?? []).reduce((acc, part) => {
-                if (part.type === 'text') {
-                    return acc + part.text
-                } else if (part.type === 'reasoning') {
-                    return acc + part.reasoning
-                } return acc
-            }, ''), model: msg.model,
-            usage: msg.usage,
-            generationStartAt: msg.generationStartAt,
-            generationEndAt: msg.generationEndAt,
-            parts: msg.parts
-        })) as Message[]
-
-        initialMessages.push(...mappedMessages)
-    }
-}
 
 provide('selectedModel', selectedModel)
 
 // Calculate messages that would be deleted for confirmation dialogs
 const getMessagesAfterCount = (messageId: string): number => {
-    const messageIndex = findMessageIndex(chat.messages.value as UIMessage[], messageId)
+    const messageIndex = findMessageIndex(chat.messages.value as Message[], messageId)
     if (messageIndex === -1) return 0
     return chat.messages.value.length - messageIndex - 1
 }
@@ -217,13 +195,13 @@ const handleEditMessage = async (messageId: string, newText: string) => {
     }
 
     try {
-        const message = chat.messages.value.find(msg => msg.id === messageId) as UIMessage
+        const message = chat.messages.value.find(msg => msg.id === messageId) as Message
         if (!message || message.role !== 'user') {
             toast.error(t('message_not_found'))
             return
         }
 
-        const messageIndex = findMessageIndex(chat.messages.value as UIMessage[], messageId)
+        const messageIndex = findMessageIndex(chat.messages.value as Message[], messageId)
         if (messageIndex === -1) return
 
         // Keep messages up to the edit point (excluding the message being edited)
@@ -263,7 +241,7 @@ const handleRetryMessage = async (messageId: string, newModelId?: string) => {
             await nextTick()
         }
 
-        const message = chat.messages.value.find(msg => msg.id === messageId) as UIMessage
+        const message = chat.messages.value.find(msg => msg.id === messageId) as Message
         if (!message) {
             toast.error(t('message_not_found'))
             return
@@ -273,7 +251,7 @@ const handleRetryMessage = async (messageId: string, newModelId?: string) => {
 
         if (message.role === 'assistant') {
             // For assistant messages, find the previous user message
-            const messageIndex = findMessageIndex(chat.messages.value as UIMessage[], messageId)
+            const messageIndex = findMessageIndex(chat.messages.value as Message[], messageId)
             const userMessages = chat.messages.value.slice(0, messageIndex).filter(msg => msg.role === 'user')
             const lastUserMessage = userMessages[userMessages.length - 1]
 
@@ -283,7 +261,7 @@ const handleRetryMessage = async (messageId: string, newModelId?: string) => {
             }
 
             userMessageContent = lastUserMessage.content || ''
-            targetMessageIndex = findMessageIndex(chat.messages.value as UIMessage[], lastUserMessage.id)
+            targetMessageIndex = findMessageIndex(chat.messages.value as Message[], lastUserMessage.id)
 
             // Get attachment IDs for the user message if it has file parts
             if (lastUserMessage.parts?.some(part => part.type === 'file')) {
@@ -298,7 +276,7 @@ const handleRetryMessage = async (messageId: string, newModelId?: string) => {
         } else {
             // For user messages, use the message content directly
             userMessageContent = message.content || ''
-            targetMessageIndex = findMessageIndex(chat.messages.value as UIMessage[], messageId)
+            targetMessageIndex = findMessageIndex(chat.messages.value as Message[], messageId)
 
             // Get attachment IDs for the message if it has file parts
             if (message.parts?.some(part => part.type === 'file')) {
@@ -418,13 +396,15 @@ const submitWithAttachments = (attachmentIds: string[], attachmentData?: { id: s
     pendingAttachmentIds.value = attachmentIds
     pendingAttachmentData.value = attachmentData || []
 }
+
 provide('submitWithAttachments', submitWithAttachments)
 
 // Centralized chat logic - simplified configuration
 const chat = useChat({
     id: props.threadId,
     api: `/api/chat`,
-    initialMessages: initialMessages, body: computed(() => {
+    initialMessages: initialMessages,
+    body: computed(() => {
         const selectedModelInfo = aiStore.llms[selectedModel.value]
         const apiKeys = selectedModelInfo ? userStore.getApiKeyForModel(selectedModelInfo) : undefined        // Build model params with web search configuration
         const modelParams: any = { ...reasoningConfig.value }
@@ -456,7 +436,8 @@ const chat = useChat({
             apiKeys: apiKeys,
             attachmentIds: pendingAttachmentIds.value.length > 0 ? pendingAttachmentIds.value : undefined,
         }
-    }), async onFinish(_message, { finishReason: _finishReason, usage: _usage }) {
+    }),
+    async onFinish(_message, { finishReason: _finishReason, usage: _usage }) {
         // Clear pending attachment IDs and data after message is sent
         pendingAttachmentIds.value = []
         pendingAttachmentData.value = []
@@ -468,7 +449,9 @@ const chat = useChat({
                 // Update thread status locally first for immediate UI update
                 currentThread.generationStatus = 'completed'
             }
-        }        // Sync router with current URL after streaming completes
+        }
+
+        // Sync router with current URL after streaming completes
         syncRouterToCurrentUrl()
 
         // Refresh threads only if we're creating a new thread (no existing threadId)
@@ -497,6 +480,31 @@ const chat = useChat({
         })
     }
 })
+
+// Load initial messages if threadId is provided
+if (props.threadId) {
+    const info = await chatStore.getThread(props.threadId)
+    if (info && 'messages' in info) {
+        const mappedMessages = info.messages.map((msg) => ({
+            id: msg.id,
+            role: msg.role,
+            content: (msg.parts ?? []).reduce((acc, part) => {
+                if (part.type === 'text') {
+                    return acc + part.text
+                } else if (part.type === 'reasoning') {
+                    return acc + part.reasoning
+                } return acc
+            }, ''), model: msg.model,
+            usage: msg.usage,
+            generationStartAt: msg.generationStartAt,
+            generationEndAt: msg.generationEndAt,
+            parts: msg.parts
+        }))
+
+        // Set messages in chat state
+        chat.setMessages(mappedMessages)
+    }
+}
 
 // Watch for new user messages and immediately add attachment parts
 const lastMessageCount = ref(0)
@@ -527,6 +535,8 @@ watchEffect(() => {
             // Clear pending attachment data
             pendingAttachmentData.value = []
             pendingAttachmentIds.value = []
+
+            chat.setMessages([...currentMessages]) // Force reactivity by replacing the array
         }
     }
 })
@@ -547,11 +557,13 @@ watchEffect(() => {
             } else if ('type' in dataItem && dataItem.type === 'metrics') {
                 const metrics = (dataItem as { data: { tokensPerSecond: number, promptTokens: number, completionTokens: number, totalTokens: number, generationStartAt: number, generationEndAt: number, model: string, messageId: string } }).data
 
+                const chatMessages = chat.messages.value as Message[]
+
                 // Find the specific message by messageId instead of assuming it's the last one
-                const targetMessage = chat.messages.value.find(msg =>
+                const targetMessage = chatMessages.find(msg =>
                     msg.id === metrics.messageId ||
-                    (msg.role === 'assistant' && chat.messages.value.indexOf(msg) === chat.messages.value.length - 1)
-                ) as UIMessage
+                    (msg.role === 'assistant' && chatMessages.indexOf(msg) === chatMessages.length - 1)
+                ) as Message
 
                 if (targetMessage && targetMessage.role === 'assistant') {
 
@@ -569,6 +581,9 @@ watchEffect(() => {
                     if (metrics.messageId && targetMessage.id !== metrics.messageId) {
                         targetMessage.id = metrics.messageId
                     }
+
+                    // Force reactivity on the messages array
+                    chat.setMessages([...chatMessages])
                 } else {
                     console.warn('⚠️ Could not find target message for metrics:', metrics.messageId);
                 }
@@ -576,7 +591,7 @@ watchEffect(() => {
                 const imageData = (dataItem as { data: { images: { base64: string, url?: string }[], messageId: string, model: string, generationStartAt: number, generationEndAt: number, responseTime: number } }).data
 
                 // Find the target message by messageId
-                const targetMessage = chat.messages.value.find(msg => msg.id === imageData.messageId) as UIMessage
+                const targetMessage = chat.messages.value.find(msg => msg.id === imageData.messageId) as Message
 
                 if (targetMessage && targetMessage.role === 'assistant') {
                     // Add images to the message parts instead of the legacy images array
@@ -696,7 +711,7 @@ const checkForErrorMessage = async () => {
 
         if (needsErrorMessage) {
             // Check if error message already exists
-            const hasExistingError = chat.messages.value.some(msg => (msg as UIMessage).isError)
+            const hasExistingError = chat.messages.value.some(msg => (msg as Message).isError)
             if (hasExistingError) {
                 console.log('Error message already exists, skipping...')
                 return
@@ -738,9 +753,7 @@ watch([() => chatStore.threads.length, () => chat.messages.value.length], async 
     }
 }, { immediate: true })
 
-// Also try after component mount
 onMounted(async () => {
-    await new Promise(resolve => setTimeout(resolve, 1000))
     await checkForErrorMessage()
 })
 

@@ -1,11 +1,11 @@
-import type { useChat, UIMessage as BaseUIMessage  } from '@ai-sdk/vue'
+import type { useChat, Message as BaseUIMessage  } from '@ai-sdk/vue'
 
 
 export type VueChatState = ReturnType<typeof useChat>
 
 export const CHAT_STATE_KEY = 'chatState' as const
 
-export interface UIMessage extends BaseUIMessage {
+export interface Message extends BaseUIMessage {
     model?: string
     usage?: {
         promptTokens?: number
@@ -19,6 +19,6 @@ export interface UIMessage extends BaseUIMessage {
 }
 
 export interface ChatState {
-    messages: UIMessage[]
+    messages: Message[]
     status: 'idle' | 'submitted' | 'streaming' | 'error'
 }

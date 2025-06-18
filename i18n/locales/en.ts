@@ -47,6 +47,7 @@ export default defineI18nLocale(async locale => {
         "copy": "Copy",
         "reset": "Reset",
         "chat": {
+            "cancel_streaming_first": "Please cancel the current streaming response or wait before sending a new message",
             "model_not_found": "Model not found",
             "input_placeholder": "Type your message here...",
             "message_input": "Message input",
@@ -279,7 +280,8 @@ export default defineI18nLocale(async locale => {
             "page_description": "Shared chat: {name}",
             "chat_created": "New chat created successfully",
             "create_chat_error": "Failed to create chat from share"
-        }, "api_keys": {
+        },
+        "api_keys": {
             "title": "API Keys Configuration",
             "description": "Configure your API keys to access AI models. Keys are stored locally in your browser and sent securely to the server only during chat sessions.",
             "security_notice": "Your API keys are stored locally and never saved on our servers. They are sent temporarily only during chat sessions.",

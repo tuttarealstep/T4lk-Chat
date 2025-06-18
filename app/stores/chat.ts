@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import type { UIMessage } from '~/types/chat'
+import type { Message } from '~/types/chat'
 import { groupThreadsByDate } from '~/utils/threadGrouping'
 
 export interface Thread {
@@ -9,6 +9,7 @@ export interface Thread {
   pinned: boolean | null
   generationStatus: 'pending' | 'generating' | 'completed'
   branchedFromThreadId: string | null
+  messages: Message[]
   updatedAt: Date
   createdAt: Date
 }
@@ -52,6 +53,7 @@ export const useChatStore = defineStore('chat', () => {
       thread.title.toLowerCase().includes(query)
     )
   })
+  
   // Function to group threads by date (to be called with translations from components)
   const getGroupedThreads = (labels: {
     pinned: string
@@ -86,7 +88,9 @@ export const useChatStore = defineStore('chat', () => {
   // Get specific thread
   const getThread = async (threadId: string) => {
     try {
-      isLoadingCurrentThread.value = true
+      if (currentThreadId.value === threadId && currentThread.value) {
+        isLoadingCurrentThread.value = true
+      }
       const thread = await $fetch<Thread>(`/api/thread/${threadId}`)
 
       // Update thread in the list if it exists
@@ -180,7 +184,7 @@ export const useChatStore = defineStore('chat', () => {
   }
 
   // Message operations
-  const startEditMessage = (message: UIMessage) => {
+  const startEditMessage = (message: Message) => {
     if (message.role !== 'user') return
 
     isEditingMessage.value = message.id
@@ -276,7 +280,7 @@ export const useChatStore = defineStore('chat', () => {
     setSearchQuery,
     startEditMessage,
     cancelEditMessage,
-    updateEditingText,    splitThread,
+    updateEditingText, splitThread,
     checkBranchedThreadOriginal,
     clearChatData
   }

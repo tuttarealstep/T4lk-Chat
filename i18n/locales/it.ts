@@ -47,6 +47,7 @@ export default defineI18nLocale(async locale => {
         "copy": "Copia",
         "reset": "Reset",
         "chat": {
+            "cancel_streaming_first": "Si prega di aspettare o annullare la risposta prima di inviare un nuovo messaggio",
             "model_not_found": "Modello non trovato",
             "input_placeholder": "Scrivi il tuo messaggio qui...",
             "message_input": "Input messaggio",

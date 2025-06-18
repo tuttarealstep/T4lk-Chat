@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, provide } from 'vue'
-import type { UIMessage } from '~/types/chat'
+import type { Message } from '~/types/chat'
 
 interface ShareData {
     shareId: string;
@@ -39,7 +39,7 @@ const props = defineProps<{
     shareData: ShareData
 }>()
 
-// Convert shared messages to UIMessage format
+// Convert shared messages to Message format
 const messages = computed(() => {
     return props.shareData.messages.map(msg => ({
         id: msg.id,
@@ -55,7 +55,7 @@ const messages = computed(() => {
         generationStartAt: msg.generationStartAt,
         generationEndAt: msg.generationEndAt,
         createdAt: new Date(msg.createdAt)
-    } as UIMessage))
+    } as Message))
 })
 
 // Create a mock chat state for read-only mode

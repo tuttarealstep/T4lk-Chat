@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { UIMessage } from '~/types/chat';
+import type { Message } from '~/types/chat';
 import type { FileUIPart } from '@ai-sdk/ui-utils';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip'
 import {
@@ -22,7 +22,7 @@ import type { UseChatHelpers } from '@ai-sdk/vue';
 import { validateMessageLength } from '~/utils/messageValidation';
 
 interface Props {
-    message: UIMessage
+    message: Message
     isLastMessage?: boolean
     readOnly?: boolean
 }
@@ -54,7 +54,7 @@ const getMessagesAfterCount = inject('getMessagesAfterCount') as ((messageId: st
 const isStreaming = inject('isStreaming') as ComputedRef<boolean> | undefined
 
 // Helper functions for message operations
-const startEditMessage = (message: UIMessage) => {
+const startEditMessage = (message: Message) => {
     chatStore.startEditMessage(message)
 }
 
@@ -551,7 +551,7 @@ const getFileTypeLabel = (mimeType: string) => {
             </article>
             <!-- Message Actions Toolbar -->
             <ClientOnly>
-                <div v-if="props.message.parts.length > 0 && !props.message.isError"
+                <div v-if="props.message?.parts && props.message.parts.length > 0 && !props.message.isError"
                     class="absolute left-0 -ml-0.5 mt-2 flex w-full flex-row gap-1 opacity-0 transition-opacity group-focus-within/message:opacity-100 group-hover/message:opacity-100 group-focus/message:opacity-100"
                     :class="{
                         'justify-start': props.message.role === 'assistant',

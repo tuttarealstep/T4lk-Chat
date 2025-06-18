@@ -132,7 +132,9 @@ export default defineEventHandler(async (event) => {
 
                 thread.title = title;
             }
-        } const lastMessage: Message | undefined = messages[messages.length - 1]
+        }
+
+        const lastMessage: Message | undefined = messages[messages.length - 1]
         if (!lastMessage) {
             setResponseStatus(event, 400);
             return { error: "No messages provided" };
@@ -151,7 +153,9 @@ export default defineEventHandler(async (event) => {
         if (!hasTextContent && !hasAttachments) {
             setResponseStatus(event, 400);
             return { error: "Message must contain either text content or attachments" };
-        }        // Salva attachmentIds su message_attachments dopo aver creato il messaggio utente
+        }
+
+        // Salva attachmentIds su message_attachments dopo aver creato il messaggio utente
         let lastUserMessageId: string | undefined;
         let messageIdForGeneration: string | undefined;
 
@@ -256,7 +260,7 @@ export default defineEventHandler(async (event) => {
                 } else {
                     // For normal conversation: save only truly new messages
                     shouldSave = index >= existingMessages.length;
-                }                if (shouldSave) {
+                } if (shouldSave) {
                     const messageId = message.id || randomUUID();
                     await useDrizzle().insert(schema.messages)
                         .values({
@@ -320,7 +324,9 @@ export default defineEventHandler(async (event) => {
                     createdAt: new Date(),
                     updatedAt: new Date()
                 }).execute()
-        }        // Get the ID of the last user message that will need generation
+        }
+
+        // Get the ID of the last user message that will need generation
         const messageId = messageIdForGeneration || lastMessage.id;
 
         if (!messageId) {
@@ -440,7 +446,9 @@ export default defineEventHandler(async (event) => {
                     } catch (error) {
                         console.error("Failed to retrieve attachments:", error);
                     }
-                } const parsedMessages = messages.map((msg) => {
+                }
+
+                const parsedMessages = messages.map((msg) => {
                     // Check if this message has only whitespace text and attachments
                     const textParts = msg.parts?.filter(part => part.type === 'text' && typeof part.text === 'string') || []
                     const hasOnlyWhitespace = textParts.length > 0 && textParts.every(part => !part.text.trim())

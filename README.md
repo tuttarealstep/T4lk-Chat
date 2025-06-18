@@ -129,6 +129,7 @@ T4lk Chat is an AI chat app built for the T3 Chat Cloneathon. The focus was on d
 - Refactor and modularize codebase
 - Add more LLM providers and features (image generation, web search, etc.)
 - Polish UI/UX design
+- Implement ws sync, maybe with convex like T3 Chat
 - Implement real-time collaboration
 - Add more attachment types support
 - Performance optimizations

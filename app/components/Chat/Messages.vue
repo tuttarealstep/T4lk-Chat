@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { DefineComponent } from 'vue'
-import type { UIMessage } from '~/types/chat'
+import type { Message } from '~/types/chat'
 import type { UseChatHelpers } from '@ai-sdk/vue'
 import ProsePreStream from '../prose/ProsePreStream.vue'
 import { useI18n } from 'vue-i18n'
@@ -267,7 +267,7 @@ onUnmounted(() => {
             <ChatWelkomeMessage v-if="!messages || messages.length === 0" /> <!-- Chat messages -->
             <ClientOnly>
                 <div v-for="(message, index) in messages" :key="message.id">
-                    <ChatMessage :message="message as UIMessage" :is-last-message="index === messages.length - 1"
+                    <ChatMessage :message="message as Message" :is-last-message="index === messages.length - 1"
                         :read-only="props.readOnly" @edit-message="handleEditMessage"
                         @retry-message="handleRetryMessage">
                         <template #content="{ message: slotMessage, isLastMessage: slotIsLastMessage }">

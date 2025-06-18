@@ -26,6 +26,11 @@ export default defineNuxtConfig({
         base: './storage',
       }
     },
+    esbuild: {
+      options: {
+        target: 'esnext'
+      },
+    },
   },
   compatibilityDate: '2025-05-15',
   devtools: { enabled: false },
@@ -43,8 +48,14 @@ export default defineNuxtConfig({
   ],
   css: ['~/assets/css/main.css'],
   vite: {
+    define: {
+      global: 'globalThis',
+    },
     optimizeDeps: {
-      include: ['debug']
+      exclude: ['debug'],
+    },
+    ssr: {
+      noExternal: ['debug']
     },
     plugins: [
       tailwindcss(),

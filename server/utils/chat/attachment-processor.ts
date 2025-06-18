@@ -57,8 +57,7 @@ export async function processAttachments(attachmentIds: string[]): Promise<Proce
 }
 
 export function convertAttachmentsToMessageContent(
-  attachments: ProcessedAttachment[],
-  hasOnlyWhitespaceText: boolean = false
+  attachments: ProcessedAttachment[]
 ) {
   return attachments
     .filter(att => att.data && att.name && att.contentType)

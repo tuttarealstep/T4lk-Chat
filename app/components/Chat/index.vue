@@ -486,9 +486,9 @@ const chat = useChat({
 
 // Load initial messages if threadId is provided
 if (props.threadId) {
-    const info = await chatStore.getThread(props.threadId)
-    if (info && 'messages' in info) {
-        const mappedMessages = info.messages.map((msg) => ({
+    const { data: threadData } = await useFetch<Thread>(`/api/thread/${props.threadId}`)
+    if (threadData.value && 'messages' in threadData.value) {
+        const mappedMessages = threadData.value.messages.map((msg) => ({
             id: msg.id,
             role: msg.role,
             content: (msg.parts ?? []).reduce((acc, part) => {

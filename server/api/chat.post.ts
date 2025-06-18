@@ -39,6 +39,7 @@ export default defineEventHandler(async (event) => {
         });
 
         const { messages, threadMetadata, model, modelParams, preferences, userInfo, apiKeys, attachmentIds } = validationResult.data;
+
         const userId = session.user.id;
 
         // Extract web search setting
@@ -186,17 +187,22 @@ export default defineEventHandler(async (event) => {
                     const textParts = msg.parts?.filter(part => part.type === 'text' && typeof part.text === 'string') || [];
                     const hasAttachments = processed_attachments && processed_attachments.length > 0;
 
-                    return {
-                        ...msg,
-                        role: msg.role,
-                        content: [
-                            ...(textParts.filter(part => part.text.trim() || !hasAttachments).map(part => ({
-                                type: 'text' as const,
-                                text: part.text
-                            }))),
-                            ...convertAttachmentsToMessageContent(processed_attachments)
-                        ]
-                    } as unknown as Message;
+                    if (hasAttachments && lastMessage.id === msg.id) {
+                        return {
+                            role: msg.role,
+                            content: [
+                                ...(textParts.filter(part => part.text.trim() || !hasAttachments).map(part => ({
+                                    type: 'text' as const,
+                                    text: part.text
+                                }))),
+                                ...convertAttachmentsToMessageContent(processed_attachments)
+                            ]
+                        } as unknown as Message;
+                    } else {
+                        return {
+                            ...msg
+                        }
+                    }
                 });
 
                 // Check if it's an image generation request
@@ -204,7 +210,7 @@ export default defineEventHandler(async (event) => {
 
                 if (isImageGeneration) {
                     await handleImageGeneration({
-                        messages,
+                        messages: parsedMessages,
                         model,
                         llmInfo,
                         apiKeys,

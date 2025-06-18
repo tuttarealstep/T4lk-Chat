@@ -412,7 +412,9 @@ const chat = useChat({
         // Add web search parameter if enabled
         if (webSearchEnabled.value) {
             modelParams.webSearch = true
-        }        // Add image generation parameters if model supports images
+        }
+
+        // Add image generation parameters if model supports images
         const isImageModel = selectedModelInfo?.features.includes(LLM_FEATURES.IMAGES)
         if (isImageModel && imageGenerationConfig.value) {
             modelParams.imageGeneration = imageGenerationConfig.value
@@ -478,7 +480,8 @@ const chat = useChat({
             },
             duration: 10000
         })
-    }
+    },
+    sendExtraMessageFields: true
 })
 
 // Load initial messages if threadId is provided

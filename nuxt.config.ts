@@ -86,13 +86,13 @@ export default defineNuxtConfig({
         code: 'en',
         name: 'English',
         language: 'en-US',
-        file: 'en.json'
+        file: 'en.ts'
       },
       {
         code: 'it',
         name: 'Italiano',
         language: 'it-IT',
-        file: 'it.json'
+        file: 'it.ts'
       }
     ],
     defaultLocale: 'en',
@@ -118,5 +118,11 @@ export default defineNuxtConfig({
       },
       "~/components"
     ]
+  },
+  icon: {
+    serverBundle: {
+      collections: ["lucide"],
+      externalizeIconsJson: true,
+    },
   }
 })

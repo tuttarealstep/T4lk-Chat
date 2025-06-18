@@ -1,4 +1,4 @@
-# T4lk Chat – T3 ChatCloneathon Submission
+# T4lk Chat – T3 Chat Cloneathon Submission
 
 Welcome to **T4lk Chat**, my entry for the [T3 Chat Cloneathon](https://cloneathon.t3.chat/)!
 
@@ -18,7 +18,7 @@ T4lk Chat is an AI chat app built for the T3 Chat Cloneathon. The focus was on d
 ### ✅ Core Requirements (All Met)
 
 - **Chat with Various LLMs:**
-  - Supports multiple language models/providers (see settings)
+  - Supports multiple language models/providers
 - **Authentication & Sync:**
   - User authentication with chat history synced per user
   - Anonymous mode available
@@ -60,7 +60,7 @@ T4lk Chat is an AI chat app built for the T3 Chat Cloneathon. The focus was on d
 ### Prerequisites
 
 - Node.js (v20 or higher)
-- npm or any compatible package manager (pnpm, yarn, bun etc.)
+- pnpm or any compatible package manager (npm, yarn, bun etc.)
 
 ### Installation & Setup
 
@@ -74,7 +74,7 @@ T4lk Chat is an AI chat app built for the T3 Chat Cloneathon. The focus was on d
 2. **Install dependencies:**
 
    ```bash
-   npm install
+   pnpm install
    # or
    bun install
    ```
@@ -93,7 +93,7 @@ T4lk Chat is an AI chat app built for the T3 Chat Cloneathon. The focus was on d
 4. **Start the development server:**
 
    ```bash
-   npm run dev
+   pnpm run dev
    # or
    bun dev
    ```

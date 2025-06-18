@@ -40,6 +40,7 @@ export default defineNuxtConfig({
     '@vueuse/nuxt',
     '@nuxtjs/mdc',
     '@pinia/nuxt',
+    '@nuxthub/core'
   ],
   css: ['~/assets/css/main.css'],
   vite: {

@@ -85,14 +85,14 @@ const handleLogout = async () => {
         <div class="group pointer-events-none absolute top-3.5 z-10 -mb-8 h-32 w-full origin-top transition-all ease-snappy"
             :class="{
                 '-translate-y-3.5 scale-y-0': sidebarState === 'collapsed',
-            }" style="box-shadow: 10px -10px 8px 2px var(--gradient-noise-top);">
+            }" style="box-shadow: 10px -10px 8px 2px hsl(var(--gradient-noise-top));">
             <svg class="absolute -right-8 h-9 origin-top-left skew-x-[30deg] overflow-visible" version="1.1"
                 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 128 32"
                 xml:space="preserve">
-                <line stroke="var(--gradient-noise-top)" stroke-width="2px" shape-rendering="optimizeQuality"
+                <line stroke="hsl(var(--gradient-noise-top))" stroke-width="2px" shape-rendering="optimizeQuality"
                     vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-miterlimit="10" x1="1" y1="0"
                     x2="128" y2="0" />
-                <path stroke="var(--chat-border)" class="translate-y-[0.5px]" fill="var(--gradient-noise-top)"
+                <path stroke="hsl(var(--chat-border))" class="translate-y-[0.5px]" fill="hsl(var(--gradient-noise-top))"
                     shape-rendering="optimizeQuality" stroke-width="1px" stroke-linecap="round" stroke-miterlimit="10"
                     vector-effect="non-scaling-stroke"
                     d="M0,0c5.9,0,10.7,4.8,10.7,10.7v10.7c0,5.9,4.8,10.7,10.7,10.7H128V0" />

@@ -254,9 +254,9 @@ onMounted(() => {
 
       <div id="chat-input-container" class="pointer-events-none">
         <div class="pointer-events-auto">
-          <div class="rounded-t-[20px] bg-[var(--chat-input-background)] p-2 pb-0 backdrop-blur-lg">
+          <div class="rounded-t-[20px] bg-[hsl(var(--chat-input-background))] p-2 pb-0 backdrop-blur-lg">
             <form
-              class="relative flex w-full flex-col items-stretch gap-2 rounded-t-xl border border-b-0 border-white/70 bg-[var(--chat-input-background)] px-3 pt-3 text-secondary-foreground outline outline-[var(--chat-input-gradient)] pb-safe-offset-3 max-sm:pb-6 sm:max-w-3xl dark:border-[hsl(0,0%,83%)]/[0.04] dark:bg-secondary/[0.045] dark:outline-chat-background/40"
+              class="relative flex w-full flex-col items-stretch gap-2 rounded-t-xl border border-b-0 border-white/70 bg-[hsl(var(--chat-input-background))] px-3 pt-3 text-secondary-foreground outline outline-[hsl(var(--chat-input-gradient))] pb-safe-offset-3 max-sm:pb-6 sm:max-w-3xl dark:border-[hsl(0,0%,83%)]/[0.04] dark:bg-secondary/[0.045] dark:outline-chat-background/40"
               @submit.prevent="handleFormSubmit"
               @drop="handleDrop"
               @dragover="handleDragOver"

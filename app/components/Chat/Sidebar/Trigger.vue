@@ -29,10 +29,10 @@ const search = () => {
                 class="absolute -right-8 h-9 origin-top-left overflow-visible mt-0.5 translate-x-[calc(4rem+10px)] skew-x-[30deg] -scale-x-100 max-sm:hidden"
                 version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
                 viewBox="0 0 128 32" xml:space="preserve">
-                <line stroke="var(--gradient-noise-top)" stroke-width="2px" shape-rendering="optimizeQuality"
+                <line stroke="hsl(var(--gradient-noise-top))" stroke-width="2px" shape-rendering="optimizeQuality"
                     vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-miterlimit="10" x1="1" y1="0"
                     x2="128" y2="0" />
-                <path stroke="var(--chat-border)" class="translate-y-[0.5px]" fill="var(--gradient-noise-top)"
+                <path stroke="hsl(var(--chat-border))" class="translate-y-[0.5px]" fill="hsl(var(--gradient-noise-top))"
                     shape-rendering="optimizeQuality" stroke-width="1px" stroke-linecap="round" stroke-miterlimit="10"
                     vector-effect="non-scaling-stroke"
                     d="M0,0c5.9,0,10.7,4.8,10.7,10.7v10.7c0,5.9,4.8,10.7,10.7,10.7H128V0" />

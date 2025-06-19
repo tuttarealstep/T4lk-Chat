@@ -110,9 +110,9 @@ const greeting = computed(() => {
 </script>
 
 <template>
-    <div class="flex h-[calc(100vh-20rem)] items-start justify-center">
+    <div class="flex h-full items-start justify-center">
         <div
-            class="w-full space-y-6 px-2 pt-[calc(max(15vh,2.5rem))] duration-300 animate-in fade-in-50 zoom-in-95 sm:px-8">
+            class="w-full space-y-6 px-2 pt-6 sm:pt-[calc(max(15vh,2.5rem))] duration-300 animate-in fade-in-50 zoom-in-95 sm:px-8">
             <ClientOnly>
                 <h2 class="text-3xl font-semibold">{{ greeting }}</h2>
                 <template #fallback>
@@ -122,8 +122,7 @@ const greeting = computed(() => {
 
             <!-- Category buttons -->
             <div class="flex flex-row flex-wrap gap-2.5 text-sm max-sm:justify-evenly">
-                <Button
-v-for="category in categories" :key="category.id" variant="secondary"
+                <Button v-for="category in categories" :key="category.id" variant="secondary"
                     class="max-sm:size-16 max-sm:flex-col sm:gap-2 sm:rounded-full transition-colors" :class="{
                         'bg-primary text-primary-foreground hover:bg-primary/90': selectedCategory === category.id,
                         'hover:bg-secondary/80': selectedCategory !== category.id
@@ -135,20 +134,18 @@ v-for="category in categories" :key="category.id" variant="secondary"
 
             <!-- Questions list -->
             <div class="flex flex-col text-foreground min-h-[240px] relative">
-                <Transition
-enter-active-class="transition-all duration-300 ease-out"
+                <Transition enter-active-class="transition-all duration-300 ease-out"
                     enter-from-class="opacity-0 translate-y-6 scale-95"
                     enter-to-class="opacity-100 translate-y-0 scale-100"
                     leave-active-class="transition-all duration-200 ease-in"
                     leave-from-class="opacity-100 translate-y-0 scale-100"
                     leave-to-class="opacity-0 -translate-y-6 scale-95" mode="out-in">
                     <div v-if="selectedCategory" :key="selectedCategory" class="space-y-0">
-                        <div
-v-for="(question, index) in selectedQuestions" :key="index"
+                        <div v-for="(question, index) in selectedQuestions" :key="index"
                             class="flex items-start gap-2 border-t border-secondary/40 py-1 first:border-none transform transition-all duration-200"
                             :style="{ 'transition-delay': `${index * 50}ms` }">
                             <button
-class="w-full rounded-md py-2 text-left text-secondary-foreground hover:bg-secondary/50 sm:px-3 transition-all duration-200 hover:translate-x-1"
+                                class="w-full rounded-md py-2 text-left text-secondary-foreground hover:bg-secondary/50 sm:px-3 transition-all duration-200 hover:translate-x-1"
                                 @click="handleQuestionClick(question)">
                                 <span>{{ question }}</span>
                             </button>
